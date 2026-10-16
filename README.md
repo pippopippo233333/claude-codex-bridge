@@ -6,6 +6,9 @@ other is doing, and get the other's replies automatically, while you keep talkin
 Messages are always labelled (`From Codex`, `From Claude Code`), so each AI knows which words come from you and
 which come from the other AI. Your own words always come first.
 
+**No API keys needed.** It works with the Claude and ChatGPT/Codex plans you already have: everything runs inside
+the two apps, so each AI uses your normal subscription or login. The only key is an optional free Gemini one.
+
 > Works with the Claude Code and Codex desktop apps and their command-line versions on Windows, macOS and Linux.
 > You need **both** apps installed and **Python 3.9 or newer**.
 
