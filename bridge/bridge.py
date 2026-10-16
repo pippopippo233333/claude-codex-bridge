@@ -270,10 +270,31 @@ def _inside(room, parent):
     return bool(room) and bool(parent) and (room == parent or room.startswith(parent.rstrip("\\/") + os.sep))
 
 
-def hook_room(folder, session_room=None):
+def _follow_file(me):
+    return DATA_DIR / f"follow-{me}.json"
+
+
+def remember_follow(me, room):
+    """A tool call named a project folder other than the app's own folder for this chat (Codex
+    chats start in their own folder): let this chat's hooks follow that project too."""
+    cwd_room = room_key(os.getcwd())
+    if not room or not cwd_room or _inside(room, cwd_room) or _inside(cwd_room, room):
+        return
+    follows = _read_json(_follow_file(me), {})
+    if (follows.get(cwd_room) or {}).get("room") == room and time.time() - follows[cwd_room].get("time", 0) < 60:
+        return
+    follows[cwd_room] = {"room": room, "time": time.time()}
+    _write_json(_follow_file(me), follows)
+
+
+def hook_room(folder, session_room=None, me=None):
     """The project room for a hook. A conversation that moved into a subfolder (cd) stays in its
-    project: the closest linked project folder above it, else the room it already uses."""
+    project: the closest linked project folder above it, else the room it already uses. A chat whose
+    tools work on another folder (remember_follow) follows that project."""
     room = room_key(folder)
+    follow = _read_json(_follow_file(me), {}).get(room) if me else None
+    if follow and time.time() - follow.get("time", 0) < LEAD_SECONDS:
+        room = follow["room"]
     best = ""
     for g in load_links().get("groups", []):
         if not g.get("agents"):
@@ -977,8 +998,12 @@ def handle_hook(me, payload):
     folder = payload.get("cwd") or os.getcwd()
     now = time.time()
     sessions = load_sessions(me)
-    room = hook_room(folder, (sessions.get(sid) or {}).get("room"))
+    room = hook_room(folder, (sessions.get(sid) or {}).get("room"), me)
     active = bool(sid and (sessions.get(sid) or {}).get("active_at"))
+    # A chat that followed its tools to another project (remember_follow) belongs to that project now.
+    if active and not _inside(room_key(folder), room) and sessions[sid].get("room") != room:
+        sessions[sid]["room"] = room
+        save_sessions(me, sessions)
 
     def mark_active():
         nonlocal active
@@ -1457,6 +1482,8 @@ def wait_for_message(me, room, other, args, call=None):
 def call_tool(me, name, args, call=None):
     folder = args.get("project_folder") or os.getcwd()
     room = room_key(folder)
+    if args.get("project_folder"):
+        remember_follow(me, room)
     other = OTHER.get(me, "claude")
     if name == "send_message":
         text = (args.get("text") or "").strip()
