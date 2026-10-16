@@ -6,7 +6,7 @@ your explanation short and plain: the user may not be technical.
 
 ## 1. Get the code
 - If the repository isn't on disk yet, clone it into a normal folder (not a system folder):
-  `git clone https://github.com/pippopippo233333/agent-bridge`. If git isn't available, download the ZIP from the
+  `git clone https://github.com/pippopippo233333/claude-codex-bridge`. If git isn't available, download the ZIP from the
   repository page and unzip it.
 - Read `README.md` and `install.py` before running anything, so you can explain what will change.
 

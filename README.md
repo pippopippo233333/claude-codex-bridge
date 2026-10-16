@@ -1,4 +1,4 @@
-# Agent Bridge
+# Agent Bridge: connect Claude Code and Codex
 
 **Let Claude Code and Codex work together as teammates.** Each AI can message the other, hand off work, see what the
 other is doing, and get the other's replies automatically, while you keep talking to both in their own apps.
@@ -15,7 +15,7 @@ which come from the other AI. Your own words always come first.
 
 Open **Claude Code** or **Codex** and paste this:
 
-> Install Agent Bridge for me from https://github.com/pippopippo233333/agent-bridge, following its AGENT_SETUP.md.
+> Install Agent Bridge for me from https://github.com/pippopippo233333/claude-codex-bridge, following its AGENT_SETUP.md.
 
 The AI downloads it, runs the installer, checks the result, and tells you the few things only you can do
 (restart the apps, approve a prompt in Codex). That's it.
@@ -26,7 +26,7 @@ The AI downloads it, runs the installer, checks the result, and tells you the fe
    (Windows: tick "Add python.exe to PATH" in the installer).
 2. Download this repository (green **Code** button → **Download ZIP**, then unzip it), or:
    ```
-   git clone https://github.com/pippopippo233333/agent-bridge
+   git clone https://github.com/pippopippo233333/claude-codex-bridge
    ```
 3. Open a terminal in that folder and run:
    ```
