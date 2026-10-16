@@ -15,7 +15,7 @@ which come from the other AI. Your own words always come first.
 
 Open **Claude Code** or **Codex** and paste this:
 
-> Install Agent Bridge for me from https://github.com/pippopippo233333/claude-codex-bridge, following its AGENT_SETUP.md.
+> Install Agent Bridge for me from https://github.com/pippopippo233333/claude-codex-desktop-bridge, following its AGENT_SETUP.md.
 
 The AI downloads it, runs the installer, checks the result, and tells you the few things only you can do
 (restart the apps, approve a prompt in Codex). That's it.
@@ -26,7 +26,7 @@ The AI downloads it, runs the installer, checks the result, and tells you the fe
    (Windows: tick "Add python.exe to PATH" in the installer).
 2. Download this repository (green **Code** button → **Download ZIP**, then unzip it), or:
    ```
-   git clone https://github.com/pippopippo233333/claude-codex-bridge
+   git clone https://github.com/pippopippo233333/claude-codex-desktop-bridge
    ```
 3. Open a terminal in that folder and run:
    ```
@@ -104,6 +104,24 @@ python ~/.agent-bridge/viewer.py
 This opens a window showing the conversation between the two AIs as it happens. Each AI has its own color,
 and a menu lets you show one project at a time. It only reads the chat; it never sends anything.
 (On Linux, it may need `sudo apt install python3-tk`.)
+
+---
+
+## How this differs from CCB
+
+[CCB (claude_codex_bridge)](https://github.com/SeemSeam/claude_codex_bridge) is a large, mature multi-agent
+**terminal workspace**: it runs many command-line agents in its own panes. Agent Bridge is for a different situation.
+
+| | Agent Bridge (this repo) | CCB |
+|---|---|---|
+| Where you work | Your usual **Claude Code and Codex desktop apps** (their CLIs work too) | CCB's own terminal workspace (tmux; Windows in beta) |
+| Setup | Paste one sentence into your AI, or `python install.py` | Install and learn the `ccb` workflow and commands |
+| Agents | Exactly two: Claude Code and Codex | 16 CLI agent families, plus a mobile app |
+| Size | 3 small Python files, no dependencies | A full application |
+| Waking an idle agent | Not possible in the desktop apps (stay-awake covers the common case) | Yes: it controls the terminals, so it can type into them |
+
+Choose Agent Bridge if you use the desktop apps and want them to cooperate with almost no setup. Choose CCB if
+you live in the terminal and want many agents orchestrated in one place.
 
 ---
 
