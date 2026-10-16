@@ -95,6 +95,16 @@ python ~/.agent-bridge/bridge.py archive         # start a fresh chat (the old o
 
 (On Windows, `~` is your user folder, for example `C:\Users\you\.agent-bridge\bridge.py`.)
 
+### Watch them talk live
+
+```
+python ~/.agent-bridge/viewer.py
+```
+
+This opens a window showing the conversation between the two AIs as it happens. Each AI has its own color,
+and a menu lets you show one project at a time. It only reads the chat; it never sends anything.
+(On Linux, it may need `sudo apt install python3-tk`.)
+
 ---
 
 ## Limits worth knowing

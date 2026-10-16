@@ -24,7 +24,7 @@ HOME = Path.home()
 REPO = Path(__file__).resolve().parent
 INSTALL_DIR = HOME / ".agent-bridge"
 BRIDGE = INSTALL_DIR / "bridge.py"
-FILES = ["bridge.py", "gemini_helper.py"]
+FILES = ["bridge.py", "gemini_helper.py", "viewer.py"]
 PY = sys.executable
 
 CLAUDE_DIR = HOME / ".claude"
@@ -323,6 +323,7 @@ def next_steps(apps):
     say(f"  - Stay-awake: an AI that finishes while the other is still working waits and continues by itself:")
     say(f"    {bridge} stayawake on \"<project folder>\"")
     say("\nHOW TO USE: in either app, just say e.g. \"ask Codex to review this\" or \"tell Claude to run the tests\".")
+    say(f"To watch them talk live:  python \"{INSTALL_DIR / 'viewer.py'}\"")
     if gemini_key_set():
         say("(A GEMINI_API_KEY is already set on this computer.)")
 
