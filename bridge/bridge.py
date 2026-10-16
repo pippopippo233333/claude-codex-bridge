@@ -266,6 +266,28 @@ def save_sessions(me, sessions):
     _write_json(_sessions_file(me), dict(newest))
 
 
+def _inside(room, parent):
+    return bool(room) and bool(parent) and (room == parent or room.startswith(parent.rstrip("\\/") + os.sep))
+
+
+def hook_room(folder, session_room=None):
+    """The project room for a hook. A conversation that moved into a subfolder (cd) stays in its
+    project: the closest linked project folder above it, else the room it already uses."""
+    room = room_key(folder)
+    best = ""
+    for g in load_links().get("groups", []):
+        if not g.get("agents"):
+            continue
+        for r in g.get("rooms", []):
+            if _inside(room, r) and len(r) > len(best):
+                best = r
+    if best:
+        return best
+    if session_room and _inside(room, session_room):
+        return session_room
+    return room
+
+
 def lead_session(me, room, links=None, sessions=None):
     """The conversation of `me` currently handling the project of `room`, or None."""
     rooms = project_rooms(room, links)
@@ -273,7 +295,7 @@ def lead_session(me, room, links=None, sessions=None):
     best, best_t = None, 0
     for sid, s in sessions.items():
         t = s.get("active_at") or 0
-        if s.get("room") in rooms and time.time() - t < LEAD_SECONDS and t > best_t:
+        if any(_inside(s.get("room") or "", r) for r in rooms) and time.time() - t < LEAD_SECONDS and t > best_t:
             best, best_t = sid, t
     return best
 
@@ -953,9 +975,9 @@ def handle_hook(me, payload):
     event = payload.get("hook_event_name") or "UserPromptSubmit"
     sid = str(payload.get("session_id") or payload.get("thread_id") or "")
     folder = payload.get("cwd") or os.getcwd()
-    room = room_key(folder)
     now = time.time()
     sessions = load_sessions(me)
+    room = hook_room(folder, (sessions.get(sid) or {}).get("room"))
     active = bool(sid and (sessions.get(sid) or {}).get("active_at"))
 
     def mark_active():
@@ -1018,7 +1040,7 @@ def handle_hook(me, payload):
             _post_limit_notice(me, folder)
         elif is_lead():
             post(me, f"stopped because of an error ({error}) and is idle.{_details(payload)}",
-                 kind="status", folder=folder)
+                 kind="status", folder=folder, room=room)
         if active:
             update_presence(me, sid, state="idle", turn_ended=now, tool_running=None, error=error)
     elif event == "Stop":
@@ -1053,20 +1075,20 @@ def handle_hook(me, payload):
             low = low_usage_to_say(me, "other")
             if low:
                 text += f"\nIts usage is low: {low} It may hand the rest of the work to you."
-            post(me, text, kind="status", folder=folder)
+            post(me, text, kind="status", folder=folder, room=room)
     elif not active:
         return
     elif event == "PreCompact":
         if is_lead():
             post(me, "is compacting its conversation. It may lose details, so resend anything important "
-                     "once it's done.", kind="status", folder=folder)
+                     "once it's done.", kind="status", folder=folder, room=room)
         start_brief(me, room)
         update_presence(me, sid, state="compacting", compact_started=now,
                         state_before_compact=get_presence(me, sid).get("state") or "working")
     elif event == "PostCompact":
         if is_lead():
             post(me, "finished compacting its conversation. It gets its recent bridge messages back, but "
-                     "may have forgotten older details.", kind="status", folder=folder)
+                     "may have forgotten older details.", kind="status", folder=folder, room=room)
         # Recap at the next prompt, unless SessionStart already gave it.
         if now - (sessions[sid].get("recap_done_at") or 0) > 120:
             sessions[sid]["recap"] = True
