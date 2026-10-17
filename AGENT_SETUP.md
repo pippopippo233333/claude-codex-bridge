@@ -43,7 +43,7 @@ If only one of the two apps is installed, say that the bridge needs both, and th
   - Turning it on for a project is a privacy choice (Google may use free-tier data). Only after the user says
     yes, run `python ~/.agent-bridge/bridge.py gemini on "<project folder>"`.
 - **Stay-awake:** an AI that finishes its turn keeps waiting (up to 2 hours) and continues by itself when the
-  other's message arrives; the user's own messages still get through within about 2 minutes. Only after the user says yes, run `python ~/.agent-bridge/bridge.py stayawake on "<project folder>"`.
+  other's message arrives; to write to a waiting AI, the user presses its stop button and then sends the message. Only after the user says yes, run `python ~/.agent-bridge/bridge.py stayawake on "<project folder>"`.
 
 ## 5. Explain how to use it (2–3 sentences)
 Something like: "From now on you can say things like *ask Codex to review this* or *tell Claude to run the

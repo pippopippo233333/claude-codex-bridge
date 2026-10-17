@@ -55,7 +55,7 @@ MUTUAL_WAIT_SECONDS = 60    # both AIs waiting on each other this long: wake the
 # Stay-awake (opt-in per project): an AI that ends its turn while its teammate is still working waits
 # in its Stop hook and continues by itself when a message arrives. The Stop hook timeout must be longer.
 STAY_WAIT_SECONDS = 540     # one wait inside the Stop hook
-STAY_STEP_SECONDS = 120     # stay-awake waits in steps this long, so the user's own messages get through
+STAY_STEP_SECONDS = 1800    # stay-awake waits in steps this long (the Stop hook timeout must be longer)
 STAY_MAX_SECONDS = 2 * 3600 # stay awake at most this long after the turn first ended
 STAY_FILE = DATA_DIR / "stay-awake.json"
 

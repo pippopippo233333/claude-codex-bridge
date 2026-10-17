@@ -41,7 +41,7 @@ CLAUDE_EVENTS = ["SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse"
                  "PostCompact", "StopFailure", "Stop"]
 CODEX_EVENTS = ["SessionStart", "UserPromptSubmit", "PreToolUse", "PostToolUse", "PreCompact",
                 "PostCompact", "Stop"]
-STOP_TIMEOUT = 600    # stay-awake waits inside the Stop hook
+STOP_TIMEOUT = 1900   # stay-awake waits inside the Stop hook (30-minute steps)
 HOOK_TIMEOUT = 10
 
 DRY = False

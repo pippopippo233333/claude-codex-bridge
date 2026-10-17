@@ -82,7 +82,7 @@ opt-in per project. Files are only read inside the project folder; `.env`, key a
 
 **Stay-awake.** When an AI finishes its turn, it keeps waiting, up to 2 hours, and continues by itself when the
 other AI's message arrives, so you don't have to come back and nudge it. You can still write to it while it
-waits: your message is picked up within about 2 minutes.
+waits: press the stop button first, then send your message. After answering you, it goes back to waiting.
 `python ~/.agent-bridge/bridge.py stayawake on "/path/to/project"`
 
 Turn either one off with `off` instead of `on`. Check them with `status`.

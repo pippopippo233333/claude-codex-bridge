@@ -40,7 +40,7 @@ exchange messages).
   `summarize_history` gives a short brief instead of reading a long `chat_history`.
 - Stay-awake (only if the user turned it on for this project): when you end your turn you keep waiting (up to 2 hours, even if Claude is idle too) and your turn
   continues by itself when Claude's message arrives (marked "continued automatically"). While you wait
-  you get a short "Still waiting" step every 2 minutes: answer any message from your user, otherwise
+  you get a short "Still waiting" step every 30 minutes: answer any message from your user, otherwise
   end it at once with no text. Your user may not be watching then: only continue work already agreed, and for anything the
   user hasn't approved or that's risky, say so and stop. If `check_status` says Claude is "WAITING for you
   (stay-awake mode)", your next message wakes it, so don't call `wait_for_message` for it. Never turn
