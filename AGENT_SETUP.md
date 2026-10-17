@@ -42,8 +42,8 @@ If only one of the two apps is installed, say that the bridge needs both, and th
     `export GEMINI_API_KEY="their-key"` line in `~/.zshrc` or `~/.bashrc`.
   - Turning it on for a project is a privacy choice (Google may use free-tier data). Only after the user says
     yes, run `python ~/.agent-bridge/bridge.py gemini on "<project folder>"`.
-- **Stay-awake:** an AI that finishes while the other is still working waits and continues by itself when the
-  reply arrives. Only after the user says yes, run `python ~/.agent-bridge/bridge.py stayawake on "<project folder>"`.
+- **Stay-awake:** an AI that finishes its turn keeps waiting (up to 2 hours) and continues by itself when the
+  other's message arrives; the user's own messages still get through within about 2 minutes. Only after the user says yes, run `python ~/.agent-bridge/bridge.py stayawake on "<project folder>"`.
 
 ## 5. Explain how to use it (2–3 sentences)
 Something like: "From now on you can say things like *ask Codex to review this* or *tell Claude to run the

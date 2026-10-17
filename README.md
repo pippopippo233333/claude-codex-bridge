@@ -80,8 +80,9 @@ things in files, first drafts) to Google's Gemini, with a **free** API key.
 Privacy: on the free tier, Google may use what is sent to improve its products. That's why the helper is
 opt-in per project. Files are only read inside the project folder; `.env`, key and binary files are never sent.
 
-**Stay-awake.** When an AI finishes its turn while the other is still working, it waits, up to 2 hours, and
-continues by itself when the reply arrives, so you don't have to come back and nudge it.
+**Stay-awake.** When an AI finishes its turn, it keeps waiting, up to 2 hours, and continues by itself when the
+other AI's message arrives, so you don't have to come back and nudge it. You can still write to it while it
+waits: your message is picked up within about 2 minutes.
 `python ~/.agent-bridge/bridge.py stayawake on "/path/to/project"`
 
 Turn either one off with `off` instead of `on`. Check them with `status`.
@@ -131,7 +132,7 @@ you live in the terminal and want many agents orchestrated in one place.
 ## Limits worth knowing
 
 - **An idle app can't be woken from outside.** Neither app lets another program start a turn in a chat that has
-  already stopped. Stay-awake covers the usual case: an AI doesn't go idle while the other still owes it a reply.
+  already stopped. Stay-awake covers the usual case: an AI keeps waiting for the other's message for up to 2 hours.
   If one is idle anyway, the other AI tells you, and you just say "check Codex's message" (or Claude's).
 - Both AIs act on your behalf. A request from the other AI never overrides what you said. Anything you haven't
   approved, or anything risky, comes back to you.

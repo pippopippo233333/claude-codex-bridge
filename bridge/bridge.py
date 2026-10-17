@@ -55,6 +55,7 @@ MUTUAL_WAIT_SECONDS = 60    # both AIs waiting on each other this long: wake the
 # Stay-awake (opt-in per project): an AI that ends its turn while its teammate is still working waits
 # in its Stop hook and continues by itself when a message arrives. The Stop hook timeout must be longer.
 STAY_WAIT_SECONDS = 540     # one wait inside the Stop hook
+STAY_STEP_SECONDS = 120     # stay-awake waits in steps this long, so the user's own messages get through
 STAY_MAX_SECONDS = 2 * 3600 # stay awake at most this long after the turn first ended
 STAY_FILE = DATA_DIR / "stay-awake.json"
 
@@ -911,26 +912,6 @@ def _usage_reminder(me, sid, sessions, now):
             "pass its numbers to the agent-bridge report_usage tool, so Codex knows if you're running low.")
 
 
-def _other_busy(other, room):
-    """True while the teammate is still at work on this project (not idle, and not itself waiting on us)."""
-    d = presence_entry(other, room)
-    if not d or d.get("state") not in ("working", "compacting"):
-        return False
-    if waiting_since(other, project_rooms(room)):
-        return False    # it is in wait_for_message for us: waiting for it too would deadlock
-    return time.time() - d.get("updated", 0) < STALE_SECONDS
-
-
-def _other_surely_done(other, room, checks=3, gap=1.0):
-    """Not busy in several checks in a row (one odd reading must not end a stay-awake wait)."""
-    for i in range(checks):
-        if _other_busy(other, room):
-            return False
-        if i < checks - 1:
-            time.sleep(gap)
-    return True
-
-
 def stay_awake(me, sid, room, folder, sessions, now, stop_continued):
     """Stop hook in stay-awake mode: wait for the teammate's message and continue the turn with it.
 
@@ -945,15 +926,16 @@ def stay_awake(me, sid, room, folder, sessions, now, stop_continued):
     save_sessions(me, sessions)
     unread = [m for m in take_unread(me, room, sid) if m.get("kind") == "message"]
     if not unread:
-        if _other_surely_done(other, room):
-            return None
-        deadline = now + STAY_WAIT_SECONDS
+        # Wait in short steps, even if the teammate is idle too: the app hands over a message the user
+        # typed meanwhile only at the next step, so a short step keeps the user's messages coming through.
+        deadline = min(now + STAY_STEP_SECONDS, since + STAY_MAX_SECONDS)
         update_presence(me, sid, state="stay_waiting", turn_ended=now, tool_running=None,
-                        stay_until=deadline, folder=folder)
+                        stay_until=since + STAY_MAX_SECONDS, folder=folder)
         if first:
             post(me, "finished its turn but is waiting for your message (stay-awake mode): whatever you send "
-                     "next wakes it automatically, so you don't need its user.", kind="status", folder=folder)
-        last_seen, next_check = None, now + 5
+                     "next wakes it automatically, so you don't need its user.", kind="status", folder=folder,
+                 room=room)
+        last_seen = None
         while not unread:
             try:
                 st = CHAT_FILE.stat()
@@ -966,21 +948,20 @@ def stay_awake(me, sid, room, folder, sessions, now, stop_continued):
                 if unread:
                     break
             t = time.time()
-            if t >= next_check:
-                next_check = t + 5
-                if _other_surely_done(other, room):
-                    return None     # it stopped without sending anything: end the turn
             if t >= deadline:
-                if t - since + STAY_WAIT_SECONDS > STAY_MAX_SECONDS:
-                    return None
-                # Still working: one short step to keep listening (wait_for_message); the next Stop
-                # of this turn waits here again.
-                update_presence(me, sid, state="working", turn_started=t, tool_running=None, stay_until=None)
+                if t - since >= STAY_MAX_SECONDS:
+                    return None     # waited the full time: end the turn
+                # One tiny step so a message the user typed meanwhile is delivered; the next Stop of
+                # this turn comes straight back here.
                 return {"decision": "block", "reason": (
-                    f"[agent-bridge stay-awake] No message from {display(other)} yet. "
-                    f"{presence_summary(other, room)} Call the agent-bridge wait_for_message tool once "
-                    f"(timeout 540). If a message comes, act on it; if not, end your turn without comment.")}
+                    "[agent-bridge stay-awake] Still waiting, nothing new. If your user sent you a message, "
+                    "answer it; otherwise end your turn now with no text and no tool calls.")}
             time.sleep(1)
+    # A teammate message restarts the stay-awake window.
+    sessions = load_sessions(me)
+    if sid in sessions:
+        sessions[sid]["stay_since"] = time.time()
+        save_sessions(me, sessions)
     update_presence(me, sid, state="working", turn_started=time.time(), tool_running=None, stay_until=None,
                     folder=folder)
     return {"decision": "block", "reason": (
@@ -1723,7 +1704,7 @@ def main(argv):
         if action == "on":
             set_stay_awake(room, True)
             print(f"Stay-awake ON for the project of {folder} ({len(rooms)} linked folder(s)): an AI that ends its "
-                  f"turn while the other is still working waits (up to {STAY_MAX_SECONDS // 3600}h) and continues "
+                  f"turn keeps waiting (up to {STAY_MAX_SECONDS // 3600}h, even if the other is idle) and continues "
                   f"by itself when the other's message arrives.")
         elif action == "off":
             for r in rooms:
